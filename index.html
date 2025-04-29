@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Fraud Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="fraud-detection-icon.svg" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        /* Your existing CSS remains unchanged */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #0a192f;
+        }
+
+        .navbar {
+            background-color: #0a192f;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #64ffda;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links li a {
+            color: #64ffda;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links li a:hover {
+            color: #4ec3a5;
+        }
+
+        .hamburger{
+            display: none;
+            font-size: 1.5rem;
+            color: #64ffda;
+            cursor: pointer;
+        }
+
+        .social-sidebar {
+            position: fixed;
+            right: 20px;
+            bottom: 15%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .social-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .phone-icon {
+            background-color: #1a6c7b;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 45px;
+            top: 0;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: #0052A5;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .dropdown-content a:hover {
+            text-decoration: underline;
+        }
+
+        .translate-container {
+            position: relative;
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .translate-btn {
+            padding: 10px 30px 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #64ffda;
+            color: #0a192f;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a192f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+
+        .translate-btn:hover {
+            background-color: #4ec3a5;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(100, 255, 218, 0.3);
+        }
+
+        .translate-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #fff;
+            min-width: 120px;
+            border: 2px solid #0052A5;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .translate-dropdown.active {
+            display: block;
+        }
+
+        .translate-dropdown a {
+            color: #0a192f;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .translate-dropdown a:hover {
+            background-color: #e6f0fa;
+        }
+
+        @media screen and (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: #0a192f;
+                width: 100%;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.show {
+                display: flex;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .translate-container {
+                margin: 10px 0;
+            }
+
+            .nav-links.show + .translate-container {
+                display: block;
+            }
+
+            .translate-dropdown {
+                right: auto;
+                left: 0;
+            }
+
+            .social-sidebar {
+                right: 10px;
+                gap: 10px;
+            }
+
+            .social-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .dropdown-content {
+                right: 40px;
+                min-width: 180px;
+            }
+        }
+
+        .hero {
+            position: relative;
+            color: #fff;
+            text-align: center;
+            padding: 80px 20px;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(70%);
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background-color: #64ffda;
+            color: #0a192f;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn:hover {
+            background-color: #4ec3a5;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(100, 255, 218, 0.3);
+        }
+
+        .features {
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .features h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #0a192f;
+        }
+
+        .feature-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #0a192f;
+        }
+
+        .feature p {
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .upload-section {
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f5f7fa;
+        }
+
+        .upload-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #0a192f;
+        }
+
+        .upload-section p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #64748b;
+        }
+
+        #uploadForm {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0a192f;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input[type="file"] {
+            padding: 5px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #64ffda;
+            box-shadow: 0 0 5px rgba(100, 255, 218, 0.3);
+        }
+
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #64ffda;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-indicator p {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .notification {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .contact {
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(to right, #0a192f, #64ffda);
+            color: #fff;
+        }
+
+        .contact h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .contact p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        footer {
+            background-color: #0a192f;
+            color: #64ffda;
+            text-align: center;
+            padding: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="social-sidebar">
+        <div class="dropdown">
+            <a href="tel:1930" class="social-icon phone-icon" title="Indian Cybercrime Reporting">
+                <i class="fas fa-phone"></i>
+            </a>
+            <div class="dropdown-content">
+                <p><strong>Indian Cybercrime Reporting</strong></p>
+                <a href="tel:1930">Helpline: 1930</a>
+                <a href="https://cybercrime.gov.in" target="_blank">Website: cybercrime.gov.in</a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <h1>Advanced Fraud Detection</h1>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#upload">Upload Data</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="translate-container">
+            <button class="translate-btn btn">Translate <i class="fas fa-globe"></i></button>
+            <div class="translate-dropdown" id="translateDropdown">
+                <a href="#" data-lang="en">English</a>
+                <a href="#" data-lang="hi">Hindi</a>
+                <a href="#" data-lang="mr">Marathi</a>
+            </div>
+        </div>
+        <div class="hamburger">☰</div>
+    </nav>
+
+    <section id="home" class="hero">
+        <video autoplay muted loop playsinline>
+            <source src="video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <h2>AI-Powered Fraud Detection</h2>
+        <p>Advanced analytics to detect and prevent fraudulent transactions with high accuracy.</p>
+        <a href="#upload" class="btn">Upload Data Now</a>
+    </section>
+
+    <section id="features" class="features">
+        <h2>Advanced Detection Capabilities</h2>
+        <div class="feature-box">
+            <div class="feature">
+                <h3>Multi-Factor Analysis</h3>
+                <p>Analyzes transaction amount, location, time, type, and historical patterns.</p>
+            </div>
+            <div class="feature">
+                <h3>Risk Profiling</h3>
+                <p>Identifies risk factors and provides detailed risk assessment.</p>
+            </div>
+            <div class="feature">
+                <h3>Actionable Insights</h3>
+                <p>Generates recommendations to handle potential fraud cases.</p>
+            </div>
+            <div class="feature">
+                <h3>Real-Time Detection</h3>
+                <p>Instantly analyzes transactions with machine learning algorithms.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="upload" class="upload-section">
+        <h2>Upload Training Data</h2>
+        <p>Upload a CSV file with transaction data to train the fraud detection model.</p>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="csvFile">Upload Training Data (CSV File)</label>
+                <input type="file" id="csvFile" accept=".csv" required>
+            </div>
+            <button type="submit" class="btn">Upload</button>
+        </form>
+        
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing the file...</p>
+        </div>
+        
+        <div id="notification" class="notification" style="display: none;"></div>
+        
+        <a href="transaction.html" id="previewBtn" class="btn" style="display: none; margin-top: 20px;">Preview Uploaded Data</a>
+    </section>
+
+    <section id="contact" class="contact">
+        <h2>Contact Us</h2>
+        <p>For enterprise fraud protection solutions, reach out to our team.</p>
+        <a href="contactus.html" class="btn">Contact Us</a>
+    </section>
+
+    <footer>
+        <p>© 2025 Advanced Fraud Detection System | All Rights Reserved</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const hamburger = document.querySelector('.hamburger');
+            const navLinks = document.querySelector('.nav-links');
+    
+            hamburger.addEventListener('click', () => {
+                navLinks.classList.toggle('show');
+            });
+    
+            const translateBtn = document.querySelector('.translate-btn');
+            const translateDropdown = document.getElementById('translateDropdown');
+            const translateLinks = document.querySelectorAll('.translate-dropdown a');
+    
+            translateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                translateDropdown.classList.toggle('active');
+            });
+    
+            document.addEventListener('click', (e) => {
+                if (!translateBtn.contains(e.target) && !translateDropdown.contains(e.target)) {
+                    translateDropdown.classList.remove('active');
+                }
+            });
+    
+            const translations = {
+                en: {
+                    'Advanced Fraud Detection': 'Advanced Fraud Detection',
+                    'AI-Powered Fraud Detection': 'AI-Powered Fraud Detection',
+                    'Advanced analytics to detect and prevent fraudulent transactions with high accuracy.': 'Advanced analytics to detect and prevent fraudulent transactions with high accuracy.',
+                    'Upload Data Now': 'Upload Data Now',
+                    'Home': 'Home',
+                    'Features': 'Features',
+                    'Upload Data': 'Upload Data',
+                    'Contact': 'Contact',
+                    'Advanced Detection Capabilities': 'Advanced Detection Capabilities',
+                    'Multi-Factor Analysis': 'Multi-Factor Analysis',
+                    'Analyzes transaction amount, location, time, type, and historical patterns.': 'Analyzes transaction amount, location, time, type, and historical patterns.',
+                    'Risk Profiling': 'Risk Profiling',
+                    'Identifies risk factors and provides detailed risk assessment.': 'Identifies risk factors and provides detailed risk assessment.',
+                    'Actionable Insights': 'Actionable Insights',
+                    'Generates recommendations to handle potential fraud cases.': 'Generates recommendations to handle potential fraud cases.',
+                    'Real-Time Detection': 'Real-Time Detection',
+                    'Instantly analyzes transactions with machine learning algorithms.': 'Instantly analyzes transactions with machine learning algorithms.',
+                    'Upload Training Data': 'Upload Training Data',
+                    'Upload a CSV file with transaction data to train the fraud detection model.': 'Upload a CSV file with transaction data to train the fraud detection model.',
+                    'Upload Training Data (CSV File)': 'Upload Training Data (CSV File)',
+                    'Upload': 'Upload',
+                    'Preview Uploaded Data': 'Preview Uploaded Data',
+                    'Processing the file...': 'Processing the file...',
+                    'File uploaded successfully!': 'File uploaded successfully!',
+                    'Contact Us': 'Contact Us',
+                    'For enterprise fraud protection solutions, reach out to our team.': 'For enterprise fraud protection solutions, reach out to our team.',
+                    '© 2025 Advanced Fraud Detection System | All Rights Reserved': '© 2025 Advanced Fraud Detection System | All Rights Reserved'
+                },
+                hi: {
+                    'Advanced Fraud Detection': 'उन्नत धोखाधड़ी पहचान',
+                    'AI-Powered Fraud Detection': 'AI-संचालित धोखाधड़ी पहचान',
+                    'Advanced analytics to detect and prevent fraudulent transactions with high accuracy.': 'उच्च सटीकता के साथ धोखाधड़ी लेनदेन का पता लगाने और रोकने के लिए उन्नत विश्लेषण।',
+                    'Upload Data Now': 'अब डेटा अपलोड करें',
+                    'Home': 'होम',
+                    'Features': 'विशेषताएं',
+                    'Upload Data': 'डेटा अपलोड करें',
+                    'Contact': 'संपर्क करें',
+                    'Advanced Detection Capabilities': 'उन्नत पहचान क्षमताएं',
+                    'Multi-Factor Analysis': 'बहु-कारक विश्लेषण',
+                    'Analyzes transaction amount, location, time, type, and historical patterns.': 'लेनदेन राशि, स्थान, समय, प्रकार और ऐतिहासिक पैटर्न का विश्लेषण करता है।',
+                    'Risk Profiling': 'जोखिम प्रोफाइलिंग',
+                    'Identifies risk factors and provides detailed risk assessment.': 'जोखिम कारकों की पहचान करता है और विस्तृत जोखिम मूल्यांकन प्रदान करता है।',
+                    'Actionable Insights': 'कार्य करने योग्य अंतर्दृष्टि',
+                    'Generates recommendations to handle potential fraud cases.': 'संभावित धोखाधड़ी मामलों को संभालने के लिए सिफारिशें उत्पन्न करता है।',
+                    'Real-Time Detection': 'वास्तविक समय पहचान',
+                    'Instantly analyzes transactions with machine learning algorithms.': 'मशीन लर्निंग एल्गोरिदम के साथ तुरंत लेनदेन का विश्लेषण करता है।',
+                    'Upload Training Data': 'प्रशिक्षण डेटा अपलोड करें',
+                    'Upload a CSV file with transaction data to train the fraud detection model.': 'धोखाधड़ी पहचान मॉडल को प्रशिक्षित करने के लिए लेनदेन डेटा के साथ एक CSV फ़ाइल अपलोड करें।',
+                    'Upload Training Data (CSV File)': 'प्रशिक्षण डेटा अपलोड करें (CSV फ़ाइल)',
+                    'Upload': 'अपलोड करें',
+                    'Preview Uploaded Data': 'अपलोड किए गए डेटा का पूर्वावलोकन करें',
+                    'Processing the file...': 'फ़ाइल को संसाधित कर रहा है...',
+                    'File uploaded successfully!': 'फ़ाइल सफलतापूर्वक अपलोड हो गई!',
+                    'Contact Us': 'हमसे संपर्क करें',
+                    'For enterprise fraud protection solutions, reach out to our team.': 'एंटरप्राइज़ धोखाधड़ी सुरक्षा समाधानों के लिए, हमारी टीम से संपर्क करें।',
+                    '© 2025 Advanced Fraud Detection System | All Rights Reserved': '© 2025 उन्नत धोखाधड़ी पहचान प्रणाली | सर्वाधिकार सुरक्षित'
+                },
+                mr: {
+                    'Advanced Fraud Detection': 'प्रगत फसवणूक शोध',
+                    'AI-Powered Fraud Detection': 'AI-शक्तीने चालणारी फसवणूक शोध',
+                    'Advanced analytics to detect and prevent fraudulent transactions with high accuracy.': 'उच्च अचूकतेसह फसव्या लेनदेन शोधण्यासाठी आणि प्रतिबंध करण्यासाठी प्रगत विश्लेषण.',
+                    'Upload Data Now': 'आता डेटा अपलोड करा',
+                    'Home': 'होम',
+                    'Features': 'वैशिष्ट्ये',
+                    'Upload Data': 'डेटा अपलोड करा',
+                    'Contact': 'संपर्क',
+                    'Advanced Detection Capabilities': 'प्रगत शोध क्षमता',
+                    'Multi-Factor Analysis': 'बहु-घटक विश्लेषण',
+                    'Analyzes transaction amount, location, time, type, and historical patterns.': 'लेनदेन रक्कम, स्थान, वेळ, प्रकार आणि ऐतिहासिक नमुने यांचे विश्लेषण करते.',
+                    'Risk Profiling': 'जोखीम प्रोफाइलिंग',
+                    'Identifies risk factors and provides detailed risk assessment.': 'जोखीम घटक ओळखते आणि तपशीलवार जोखीम मूल्यांकन प्रदान करते.',
+                    'Actionable Insights': 'कार्यक्षम अंतर्दृष्टी',
+                    'Generates recommendations to handle potential fraud cases.': 'संभाव्य फसवणूक प्रकरणे हाताळण्यासाठी शिफारसी तयार करते.',
+                    'Real-Time Detection': 'रिअल-टाइम शोध',
+                    'Instantly analyzes transactions with machine learning algorithms.': 'मशीन लर्निंग अल्गोरिदमसह त्वरित लेनदेन विश्लेषण करते.',
+                    'Upload Training Data': 'प्रशिक्षण डेटा अपलोड करा',
+                    'Upload a CSV file with transaction data to train the fraud detection model.': 'फसवणूक शोध मॉडेल प्रशिक्षित करण्यासाठी लेनदेन डेटासह CSV फाइल अपलोड करा.',
+                    'Upload Training Data (CSV File)': 'प्रशिक्षण डेटा अपलोड करा (CSV फाइल)',
+                    'Upload': 'अपलोड करा',
+                    'Preview Uploaded Data': 'अपलोड केलेल्या डेटाचे पूर्वावलोकन करा',
+                    'Processing the file...': 'फाइल प्रक्रिया करत आहे...',
+                    'File uploaded successfully!': 'फाइल यशस्वीरित्या अपलोड झाली!',
+                    'Contact Us': 'आमच्याशी संपर्क साधा',
+                    'For enterprise fraud protection solutions, reach out to our team.': 'एंटरप्राइझ फसवणूक संरक्षण समाधानांसाठी, आमच्या टीमशी संपर्क साधा.',
+                    '© 2025 Advanced Fraud Detection System | All Rights Reserved': '© 2025 प्रगत फसवणूक शोध प्रणाली | सर्व हक्क राखीव'
+                }
+            };
+    
+            translateLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const lang = link.getAttribute('data-lang');
+                    translatePage(lang);
+                    translateDropdown.classList.remove('active');
+                });
+            });
+    
+            function translatePage(lang) {
+                const elementsToTranslate = {
+                    '.navbar h1': 'Advanced Fraud Detection',
+                    '.hero h2': 'AI-Powered Fraud Detection',
+                    '.hero p': 'Advanced analytics to detect and prevent fraudulent transactions with high accuracy.',
+                    '.hero a.btn': 'Upload Data Now',
+                    '.nav-links li:nth-child(1) a': 'Home',
+                    '.nav-links li:nth-child(2) a': 'Features',
+                    '.nav-links li:nth-child(3) a': 'Upload Data',
+                    '.nav-links li:nth-child(4) a': 'Contact',
+                    '.features h2': 'Advanced Detection Capabilities',
+                    '.feature:nth-child(1) h3': 'Multi-Factor Analysis',
+                    '.feature:nth-child(1) p': 'Analyzes transaction amount, location, time, type, and historical patterns.',
+                    '.feature:nth-child(2) h3': 'Risk Profiling',
+                    '.feature:nth-child(2) p': 'Identifies risk factors and provides detailed risk assessment.',
+                    '.feature:nth-child(3) h3': 'Actionable Insights',
+                    '.feature:nth-child(3) p': 'Generates recommendations to handle potential fraud cases.',
+                    '.feature:nth-child(4) h3': 'Real-Time Detection',
+                    '.feature:nth-child(4) p': 'Instantly analyzes transactions with machine learning algorithms.',
+                    '.upload-section h2': 'Upload Training Data',
+                    '.upload-section p': 'Upload a CSV file with transaction data to train the fraud detection model.',
+                    '.form-group label': 'Upload Training Data (CSV File)',
+                    '#uploadForm button.btn': 'Upload',
+                    '#previewBtn': 'Preview Uploaded Data',
+                    '.loading-indicator p': 'Processing the file...',
+                    '.contact h2': 'Contact Us',
+                    '.contact p': 'For enterprise fraud protection solutions, reach out to our team.',
+                    '.contact a.btn': 'Contact Us',
+                    'footer p': '© 2025 Advanced Fraud Detection System | All Rights Reserved'
+                };
+    
+                Object.entries(elementsToTranslate).forEach(([selector, key]) => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.textContent = translations[lang][key];
+                    }
+                });
+            }
+    
+            const uploadForm = document.getElementById("uploadForm");
+            const loadingIndicator = document.getElementById("loadingIndicator");
+            const notification = document.getElementById("notification");
+            const previewBtn = document.getElementById("previewBtn");
+    
+            uploadForm.addEventListener("submit", async function(event) {
+                event.preventDefault();
+                
+                loadingIndicator.style.display = "flex";
+                notification.style.display = "none";
+                previewBtn.style.display = "none";
+                
+                const csvFile = document.getElementById("csvFile").files[0];
+                if (!csvFile) {
+                    loadingIndicator.style.display = "none";
+                    showNotification("Please upload a CSV file.", "error");
+                    return;
+                }
+    
+                const formData = new FormData();
+                formData.append('file', csvFile);
+                
+                try {
+                    const response = await fetch("http://127.0.0.1:5000/store_csv", {
+                        method: "POST",
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+    
+                    const result = await response.json();
+                    loadingIndicator.style.display = "none";
+    
+                    if (result.error) {
+                        showNotification(result.error, "error");
+                    } else {
+                        showNotification("File uploaded successfully!", "success");
+                        previewBtn.style.display = "inline-block"; // Show the Preview button
+                    }
+                } catch (error) {
+                    loadingIndicator.style.display = "none";
+                    showNotification("Server connection failed during file upload! " + error.message, "error");
+                    console.error("Fetch error details:", error); // Log detailed error
+                }
+            });
+    
+            function parseCSV(csvText) {
+                const result = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+                const data = result.data;
+    
+                if (!data || data.length === 0) {
+                    throw new Error("No data parsed from CSV");
+                }
+    
+                const headers = Object.keys(data[0] || {});
+                const targetCol = headers.find(h => h.toLowerCase().includes('fraud'));
+                if (!targetCol) {
+                    throw new Error("No fraud-related target column found");
+                }
+                return data;
+            }
+    
+            function showNotification(message, type) {
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.style.display = "block";
+            }
+        });
+    </script>
+</body>
+</html>

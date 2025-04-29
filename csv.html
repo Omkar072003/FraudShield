@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Download Transactions</title>
+</head>
+<body>
+    <h2>Transaction Risk Assessment</h2>
+    <p><strong>Classification:</strong> Fraudulent</p>
+    <p><strong>Risk Level:</strong> High</p>
+    <p><strong>Confidence:</strong> 100%</p>
+    <p><strong>Risk Factors:</strong> Large transaction amount, unusual time</p>
+    <p><strong>Recommendations:</strong> Investigate immediately</p>
+    
+    <br>
+    <button onclick="downloadCSV()">Download Transactions CSV</button>
+
+    <script>
+        function downloadCSV() {
+            const csvContent = `transaction_id,amount,date,time,fraud,location,type
+1,100.50,01/04/2025,12:00,0,IN,online
+2,1500.75,02/04/2025,23:00,1,US,atm
+3,45.20,03/04/2025,09:15,0,UK,pos
+4,2000.00,04/04/2025,02:30,1,IN,online
+5,300.25,05/04/2025,15:45,0,US,pos
+6,999.99,06/04/2025,20:00,1,UK,atm
+7,75.60,07/04/2025,10:30,0,IN,online
+8,1200.40,08/04/2025,03:15,1,US,online
+9,50.00,09/04/2025,14:00,0,UK,pos
+10,2500.00,10/04/2025,01:00,1,IN,atm`;
+
+            // Create a blob with the CSV content
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // Create a temporary link element
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Set the download attribute and filename
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'transactions.csv');
+            
+            // Append to body, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the URL object
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
